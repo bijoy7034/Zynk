@@ -1,0 +1,43 @@
+# ----------------------------
+# Python (FastAPI Backend)
+# ----------------------------
+__pycache__/
+backend/__pycache__/
+backend/**/*.py[cod]
+backend/venv/
+backend/.env
+backend/.env.*
+backend/*.sqlite3
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/*.log
+backend/*.db
+backend/instance/
+
+# ----------------------------
+# Node (React/Vite Frontend)
+# ----------------------------
+client/node_modules/
+client/.env
+client/.env.*
+
+# ----------------------------
+# General
+# ----------------------------
+*.DS_Store
+*.log
+*.pid
+*.pid.lock
+*.coverage
+.cache/
+*.egg-info/
+dist/
+build/
+
+# ----------------------------
+# Editors / IDEs
+# ----------------------------
+.vscode/
+*.swp
+*~
+.idea/
