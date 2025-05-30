@@ -10,6 +10,8 @@ def create_access(data : dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def verify_access(token: str):
+    if not token:
+        raise HTTPException(status_code=401, detail="No token found")
     try:
         token = token.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

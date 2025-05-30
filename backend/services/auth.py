@@ -15,8 +15,8 @@ async def register_user(email: str, password: str, fullname: str):
             "fullname": fullname
         })
         return {"message": "User registered successfully"} 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error occurred: {str(e)}")
+    except HTTPException as e:
+        raise e
 
 async def login_user(email: str, password: str):
     existing_user = await user_collection.find_one({"email": email})

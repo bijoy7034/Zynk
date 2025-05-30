@@ -8,10 +8,12 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
    created_at: datetime 
    author_email: str
+   likes: List[str] = []
+   comments: List[dict] = []
+   updated_at: datetime
 
 class PostResponse(PostCreate):
     id :str
-    likes: List[str] = []
 
 class PostUpdate(PostBase):
     id: str

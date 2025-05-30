@@ -9,7 +9,8 @@ async def create_post(content: str, user_email: str):
         post_data = PostCreate(
             content=content,
             author_email=user_email,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
         )
         result = await post_collection.insert_one(post_data.model_dump())
         return {
@@ -42,27 +43,30 @@ async def update_post(post_id: str, user_email: str, content : str):
         post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if not post:
             raise HTTPException(detail="No post found", status_code=404)
-        if not post.get("author") == user_email:
-            raise HTTPException("You are not allowed to update this post", status_code=403)
+        if post.get("author_email") != user_email:
+            raise HTTPException(detail="You are not allowed to update this post", status_code=403)
         await post_collection.update_one({"_id": post_id}, {
             "$set" : {
                 "content" : content
             }
         })
+        return {"message": "Post updated successfully"}
     except HTTPException as e:
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-async def delete_post(post_id: str, user_email):
+async def delete_post(post_id: str, user_email:str):
     try:
         post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if not post:
             raise HTTPException(detail="No post found", status_code=404)
-        if not post.get("author") == user_email:
-            raise HTTPException("You are not allowed to update this post", status_code=400)
+        if post.get("author_email") != user_email:
+            raise HTTPException(detail="You are not allowed to update this post", status_code=400)
         await post_collection.delete_one({"_id" : ObjectId(post_id)})
+        return {"message" : "Post deleted!!"}
     except HTTPException as e:
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
