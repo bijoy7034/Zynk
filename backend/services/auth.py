@@ -32,7 +32,7 @@ async def login_user(email: str, password: str):
     existing_user.pop("_id", None)
 
 
-    access_token = token.create_access({"email": existing_user.get("email")})
+    access_token = token.create_access({"email": existing_user.get("email"), "id" : existing_user["id"], "name" : existing_user["fullname"]})
     existing_user["access_token"] = access_token
 
     return existing_user

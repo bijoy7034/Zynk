@@ -12,7 +12,9 @@ async def create_post(content: str, user_email: str):
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow()
         )
-        result = await post_collection.insert_one(post_data.model_dump())
+        data = post_data.model_dump()
+        data["visibility"] = post_data.visibility.value
+        result = await post_collection.insert_one(data)
         return {
             "message": "Post created successfully",
             "post": {
@@ -38,24 +40,26 @@ async def get_all_post():
     except Exception as e :
         raise HTTPException(status_code=500, detail=str(e))
 
-async def update_post(post_id: str, user_email: str, content : str):
+async def update_post(post_id: str, user_email: str, content: str):
     try:
         post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if not post:
             raise HTTPException(detail="No post found", status_code=404)
+
         if post.get("author_email") != user_email:
             raise HTTPException(detail="You are not allowed to update this post", status_code=403)
-        await post_collection.update_one({"_id": post_id}, {
-            "$set" : {
-                "content" : content
-            }
-        })
+
+        await post_collection.update_one(
+            {"_id": ObjectId(post_id)}, 
+            {"$set": {"content": content}}
+        )
         return {"message": "Post updated successfully"}
+
     except HTTPException as e:
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 async def delete_post(post_id: str, user_email:str):
     try:
         post = await post_collection.find_one({"_id": ObjectId(post_id)})
@@ -70,3 +74,35 @@ async def delete_post(post_id: str, user_email:str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+async def like_post(post_id: str, user: dict):
+    try:
+        post = await post_collection.find_one({"_id" : ObjectId(post_id)})
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+        user_already_liked = any(like["id"] == user["id"] for like in post['likes'])
+        if user_already_liked:
+            post_collection.update_one({"_id" : ObjectId(post_id)}, {
+                "$pull" : {
+                    "likes" : {
+                        "id" : user['id'],
+                        "name" : user['name']
+                    }
+                }
+            })
+            return {"message" : "unliked"}
+        else:
+            post_collection.update_one({"_id" : ObjectId(post_id)}, {
+                "$push" : {
+                    "likes" : {
+                        "id" : user['id'],
+                        "name" : user['name']
+                    }
+                }
+            })
+            return {"message" : "liked"}
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
